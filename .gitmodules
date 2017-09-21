@@ -1,0 +1,3 @@
+[submodule "src/libaeds"]
+	path = src/libaeds
+	url = https://github.com/gahag/libaeds
