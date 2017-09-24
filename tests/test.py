@@ -12,6 +12,8 @@ tptester.tp_test(
   [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ],
   os.getcwd() + '/kontest',
   
+  #valgrind = True,
+  
   input_file = lambda ix: tests_dir + '/data/toys/in_' + str(ix) + '.in',
   answer_file = lambda ix: tests_dir + '/data/toys/in_' + str(ix) + '.out',
   
