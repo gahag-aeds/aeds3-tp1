@@ -6,8 +6,14 @@
 #include <probmat.h>
 
 
-#define KONTEST_MAX 25
+#define KONTEST_MAX 25  // The maximum players to compete
+                        // in the mortal kontest championship.
 
+
+// For a given ProbMat, calculate the probabilities
+// of each player winning the correspondent mortal kontest championship.
+// The caller has the responsibility to free the returned pointer with the given allocator.
+// Complexity: O()
 Probability* kontest_championship(const Allocator*, ProbMat);
 
 

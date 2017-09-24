@@ -1,24 +1,55 @@
 #include "kontest.h"
 
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <math.h>
 #include <string.h>
 
 #include <libaeds/data/bits.h>
 
 
-typedef uint32_t GroupId; // The KONTEST_MAX is 25, so 32 bits is enough.
+// A GroupId identifies a group. Each team in the championship is represented by one bit
+// in the GroupId. If the bit is set, the team is in the group. Otherwise, the team has
+// already been eliminated.
+// The KONTEST_MAX is 25, so 32 bits is enough.
+typedef uint32_t GroupId; 
 
 typedef struct Group {
-  bool processed;
-  Probability probs[KONTEST_MAX];
+  bool processed; // Whether the probabilities for the group have already been calculated.
+  
+  // The probabilities of each team winning in this group.
+  // The indexing in this array is correspondent to the bit index in the GroupId.
+  // Therefore, is a team is represented by the 3rd bit in the GroupId, it's winning
+  // probability will be probs[3].
+  Probability probs[];
 } Group;
 
 
+// Indexing for a group array.
+// As the probs member of the Group struct is a flexible member array,
+// standard bracket indexing does not work correctly.
+// Complexity: O(1)
+static Group* get_group(size_t probs_size, Group* groups, GroupId id) {
+  uint8_t* const groups_bytes = (void*) groups;
+  
+  const size_t group_size = sizeof(Group) + sizeof(Probability[probs_size]);
+  
+  return (void*) (groups_bytes + id * group_size);
+}
+
+
+// Function to compute the probabilities for a specific group.
+// If the probabilities have already been calculated, no recalculations are made.
+// Complexity: O()
 static Group* compute(ProbMat probmat, Group* groups, GroupId grp) {
-  Group* group = &groups[grp];
+  // Due to the exclusion of the empty and unitary groups,
+  // it is necessary to exclude them from the indexing.
+  // ceil(log2(grp)) is the number of unitary groups that precede the given group.
+  // 1 corresponds to the empty group.
+  const size_t group_ix = grp - (size_t) ceil(log2(grp)) - 1;
+  
+  Group* group = get_group(probmat.size, groups, group_ix);
   
   if (group->processed)
     return group;
@@ -28,39 +59,48 @@ static Group* compute(ProbMat probmat, Group* groups, GroupId grp) {
   
   uint8_t grp_size = popcount_32(grp);
   
+  // For a group of size n, the number of possible picks of two teams is
+  // T = (n^2 - n) / 2
+  // Considering all picks are equiprobable, the probability is
+  // 1 / T
   Probability pick = 2.0 / (grp_size * grp_size - grp_size);
   
+  // Loop over teams in the group:
   for (uint8_t first = 0; first < probmat.size - 1; first++) {
-    if (!(grp & (1 << first)))   // the bit correspondent to the first is not set
+    if (!testbit_32(grp, first))  // Team is not in the group.
       continue;
     
+    // Loop over the next teams:
     for (uint8_t second = first + 1; second < probmat.size; second++) {
-      if (!(grp & (1 << second)))   // the bit correspondent to the second is not set
+      if (!testbit_32(grp, second)) // Team is not in the group.
         continue;
       
+      // Loop over the probabilities array of the group:
       for (uint8_t i = 0; i < probmat.size; i++) {
         // second loses:
         if (second != i) {
-          // subgroup that excludes the second:
-          Group* subgroup = compute(probmat, groups, grp & ~(1 << second));
-          
           Probability prob = pick * (*probmat_query(probmat, first, second));
           
-          if (grp_size > 2)
+          if (grp_size > 2) { // There are only subgroups to groups bigger than 2.
+            // subgroup that excludes the second:
+            Group* subgroup = compute(probmat, groups, unsetbit_32(grp, second));
+            
             prob *= subgroup->probs[i];
+          }
 
           group->probs[i] += prob;
         }
         
         // first loses:
         if (first != i) {
-          // subgroup that excludes the first:
-          Group* subgroup = compute(probmat, groups, grp & ~(1 << first));
-          
           Probability prob = pick * (*probmat_query(probmat, second, first));
           
-          if (grp_size > 2)
+          if (grp_size > 2) { // There are only subgroups to groups bigger than 2.
+            // subgroup that excludes the first:
+            Group* subgroup = compute(probmat, groups, unsetbit_32(grp, first));
+
             prob *= subgroup->probs[i];
+          }
           
           group->probs[i] += prob;
         }
@@ -72,23 +112,28 @@ static Group* compute(ProbMat probmat, Group* groups, GroupId grp) {
 }
 
 
+// Complexity: O()
 Probability* kontest_championship(const Allocator* allocator, ProbMat probmat) {
+  assert(allocator != NULL);
+  assert(probmat.size > 1);
+  assert(probmat.data != NULL);
+  
   // All possible subgroups of a group G are: P(G) \ U(G) \ {}
   // Where P(G) is the powerset of G, U(G) are the unitary subsets of G.
-  // The set of possible subgroups would therefore have cardinality 2^|G| - |G| - 1.
-  // But, to use the GroupId as the indexer for the array, the useless unitary
-  // groups, as well as the empty group, are kept.
-  const size_t groups_size = 1ul << probmat.size; // 2^probmat.size
+  // The set of possible subgroups therefore has cardinality 2^|G| - |G| - 1.
+  const size_t groups_size = (1ul << probmat.size) - probmat.size - 1;
   
   Group* groups = al_alloc_clear(
     allocator,
     groups_size,
-    sizeof(Group) // + sizeof(Probability[probmat.size])
+    sizeof(Group) + sizeof(Probability[probmat.size])
   );
   
   
-  Group* group = compute(probmat, groups, groups_size - 1); // The last group
-                                                            // is the total group.
+  const GroupId base_groupid = (1ul << probmat.size) - 1; // Group with all teams.
+  
+  Group* group = compute(probmat, groups, base_groupid); 
+  
   
   Probability* result = al_alloc(allocator, 1, sizeof(Probability[probmat.size]));
   

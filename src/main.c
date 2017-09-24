@@ -8,7 +8,7 @@
 
 
 
-Probability probdata[KONTEST_MAX * KONTEST_MAX];
+Probability probdata[KONTEST_MAX * KONTEST_MAX]; // Array for the ProbMat.
 
 int main() {
   const Allocator allocator = std_allocator(abort);
@@ -24,14 +24,14 @@ int main() {
   
   for (unsigned short i = 0; i < size; i++)
     for (unsigned short j = 0; j < size; j++)
-      if (scanf("%lf", probmat_query(probmat, i, j)) != 1)
+      if (scanf("%f", probmat_query(probmat, i, j)) != 1)
           return -1;
   
   
   Probability* results = kontest_championship(&allocator, probmat);
   
   for (unsigned short i = 0; i < size; i++)
-    if (printf("%lf ", results[i]) < 0)
+    if (printf("%f ", results[i]) < 0)
       return -1;
   
   al_dealloc(&allocator, results);
