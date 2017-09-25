@@ -7,7 +7,7 @@ OutputFile = kontest
 
 Build    = gcc
 Standard = c99 -pedantic
-Warnings = -Wall -Wextra # -Werror
+Warnings = -Wall -Wextra -Werror
 Optimize = -O2 -flto
 Libs     = -lm
 
