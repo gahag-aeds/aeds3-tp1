@@ -14,7 +14,7 @@
 // of each player winning the correspondent mortal kontest championship.
 // The caller has the responsibility to free the returned pointer with the given allocator.
 // Complexity: O()
-Probability* kontest_championship(const Allocator*, ProbMat);
+Probability* kontest_championship(const Allocator*, ProbMat*);
 
 
 #endif /* __KONTEST_H__ */
