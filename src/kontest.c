@@ -68,12 +68,15 @@ static Group* compute(ProbMat* probmat, Group* groups, GroupId grp) {
   Probability pick = 2.0 / (grp_size * grp_size - grp_size);
   
   // Loop over teams in the group:
-  for (uint8_t first = 0; first < teams_count - 1; first++) {
+  const uint8_t bottom = lsb_32(grp); // Index of the first set bit in grp.
+  const uint8_t top = msb_32(grp);    // Index of the last set bit in grp.
+  
+  for (uint8_t first = bottom; first < top; first++) { // All except last.
     if (!testbit_32(grp, first))  // Team is not in the group.
       continue;
     
     // Loop over the next teams:
-    for (uint8_t second = first + 1; second < teams_count; second++) {
+    for (uint8_t second = first + 1; second < top + 1; second++) { // All after first.
       if (!testbit_32(grp, second)) // Team is not in the group.
         continue;
       
