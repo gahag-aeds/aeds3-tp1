@@ -1,0 +1,124 @@
+Running tests for /gahag/programming/langs/c/aeds/3/tp1/kontest
+
+Test #2
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.000s
+System time: 0.001s
+
+Test #3
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.000s
+System time: 0.001s
+
+Test #4
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.000s
+System time: 0.001s
+
+Test #5
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.001s
+System time: 0.000s
+
+Test #6
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.001s
+System time: 0.000s
+
+Test #7
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.000s
+System time: 0.002s
+
+Test #8
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.000s
+System time: 0.002s
+
+Test #9
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.002s
+System time: 0.002s
+
+Test #10
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.007s
+System time: 0.004s
+
+Test #11
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.026s
+System time: 0.000s
+
+Test #12
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.051s
+System time: 0.003s
+
+Test #13
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.137s
+System time: 0.000s
+
+Test #14
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.340s
+System time: 0.000s
+
+Test #15
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 0.849s
+System time: 0.003s
+
+Test #16
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 2.064s
+System time: 0.000s
+
+Test #17
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 4.992s
+System time: 0.003s
+
+Test #18
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 11.920s
+System time: 0.003s
+
+Test #19
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 28.104s
+System time: 0.013s
+
+Test #20
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 65.880s
+System time: 0.043s
+
+Test #21
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 152.614s
+System time: 0.230s
+
+Test #22
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 355.344s
+System time: 0.540s
+
+Test #23
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 804.164s
+System time: 1.076s
+
+Test #24
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 1784.848s
+System time: 0.820s
+
+Test #25
+Executing /gahag/programming/langs/c/aeds/3/tp1/kontest: 0
+User time: 4055.988s
+System time: 2.545s
+
+Summary:
+All passed!
