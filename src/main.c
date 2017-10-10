@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #include <libaeds/memory/allocator.h>
 #include <libaeds/data/resources/memory.h>
@@ -14,9 +16,9 @@ int main() {
   Resources res = new_resources(&allocator);
   
   
-  unsigned short size;
+  uint8_t size;
   
-  if (scanf("%hud", &size) != 1)
+  if (scanf("%" SCNu8, &size) != 1)
     return delete_resources(&res), -1;
   
   
@@ -27,8 +29,8 @@ int main() {
     &res
   );
   
-  for (unsigned short i = 0; i < size; i++)
-    for (unsigned short j = 0; j < size; j++)
+  for (uint8_t i = 0; i < size; i++)
+    for (uint8_t j = 0; j < size; j++)
       if (scanf("%f", probmat_query(probmat, i, j)) != 1)
           return delete_resources(&res), -1;
   
@@ -40,7 +42,7 @@ int main() {
     &res
   );
   
-  for (unsigned short i = 0; i < size; i++)
+  for (uint8_t i = 0; i < size; i++)
     if (printf("%.4f ", results[i]) < 0)
       return delete_resources(&res), -1;
   
