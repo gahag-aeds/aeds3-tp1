@@ -205,12 +205,12 @@ Três operações são relevantes para análise temporal:
 \section{Análise Experimental}
 A análise experimental da implementação é mostrada pela figura 1. Para realizar os experimentos, foi feito um gerador de entradas. Para um valor $n$, é gerada uma entrada contendo um vetor de tamanho $n$, e $n / 2$ operações de busca e atualização intercaladas. O intervalo em cada operação é aleatório, mas a largura do intervalo é fixa em $n / 3$. Para medir o tempo de execução do código, foi utilizada a informação de uso de recursos fornecida pelo sistema operacional linux. Os valores $n$ foram escolhidos estrategicamente para cada teste. A razão inicial é verificar, de forma geral, o comportamento dos algoritmos para casos genéricos.
 \vspace{-10pt}
-%% \begin{figure}[h]
-%%   \centering
-%%   \includegraphics[width=0.45\linewidth]{images/matrix.png}
-%%   \includegraphics[width=0.45\linewidth]{images/tree.png}
-%%   \caption{Figura 1: Teste experimental}
-%% \end{figure}\\
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\linewidth]{images/time.png}
+  \includegraphics[width=0.45\linewidth]{images/space.png}
+  \caption{Figura 1: Teste experimental}
+\end{figure}\\
 Nos gráficos da figura 1 é notável o ganho em eficiência da árvore de segmentos sobre a matriz.
 
 \section{Conclusão}
