@@ -6,16 +6,16 @@ OutputFile = kontest
 
 
 Build    = gcc
-Standard = c99 -pedantic
+Standard = -std=c99 -pedantic
 Warnings = -Wall -Wextra -Werror
 Optimize = -O2 -flto
 Libs     = -lm
 
-BuildFlags  = $(Warnings)       \
-              -std=$(Standard)  \
-              $(Optimize)       \
-							$(Libs)						\
-              -I $(SrcDir)      \
+BuildFlags  = $(Warnings)   \
+              $(Standard)   \
+              $(Optimize)   \
+              $(Libs)       \
+              -I $(SrcDir)  \
               -o $(OutputFile)
 
 DebugFlags = -g
