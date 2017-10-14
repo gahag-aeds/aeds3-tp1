@@ -68,27 +68,21 @@
 
 
 \section{Introdução}
-O objetivo do trabalho é prover uma comparação que evidencie os ganhos de eficiência ao se estruturar dados de forma inteligente. Para tal, foi proposto um problema e duas formas de se resolver o mesmo. O problema consiste em obter informações sobre máximos, mínimos e somas em intervalos de um vetor mutável. A primeira solução consiste em estruturar os dados de forma trivial, Já a segunda solução implementa uma estruturação mais elaborada. Desta forma, será feita a comparação da eficiência de ambas soluções.
+Nubby está de volta, desta vez para organizar um campeonato de \textit{Mortal Kontest}. Participarão $\{ v_1, \hdots, v_n \}$ amigos $(1 \leq n \leq 25)$, e Nubby ficará encarregado apenas da organização de todas as $n - 1$ rodadas. Em cada rodada, dois amigos dos que não foram eliminados serão escolhidos aleatóriamente para o embate, e o que perder é eliminado do campeonato. Desta forma, a última rodada será entre os dois amigos restantes, e o vencedor desta é o grande campeão.
+
+Nubby possui dados de batalhas anteriores entre seus amigos, e através destes calculou a probabilidade de cada amigo vencer os demais em um embate. Através destas probabilidades, Nubby quer calcular a probabilidade de cada um de seus amigos vencer o campeonato.
 
 
-\section{Visão Geral das Soluções}
-Tendo como entrada um vetor de $n$ números, ambas soluções são formas de se pré-computar triplas contendo o mínimo, máximo e a soma dos elementos em dado intervalo $[i, j]$ contido no vetor.
-\[ T_{i,j} = {(\text{Min}, \text{Max}, \text{Soma})}_{i,j} \]
-
-\subsection{Matriz}
-Uma matriz foi escolhida como forma trivial de se estruturar os dados. Cada entrada na posição $i, j$ na matriz contém a tupla correspondente ao intervalo $[i,j]$.
+\section{Visão Geral da Solução}
+A entrada consiste de um número $n$ de jogadores, e uma matriz $V \in \mathbb{M}_{n \times n}$ contendo as probabilidades calculadas por Nubby. A posição $i, j$ na matriz contém a probabilidade $V_{i,j} \in [0,1]$ do jogador $v_i$ vencer o jogador $v_j$ em um embate. Além disso, todas posições da forma $i, i$ contém o valor $0$, que é a probabilidade de um jogador vencer à si mesmo, e as demais posições $i, j$ satisfazem $V_{i,j} = 1 - V_{j,i}$.
 \[
   \begin{bmatrix}
-      T_{1,1} & \hdots  & T_{1,n} \\
+      0 & \hdots  & V_{1,n} \\
       \vdots & \ddots  & \vdots \\
-      T_{n,1} & \hdots & T_{n,n}
+      V_{n,1} & \hdots & 0
   \end{bmatrix}
 \]
-Para se obter a tripla de um certo intervalo, uma simples consulta na matriz é suficiente. \\
-Para cada alteração no vetor, a matriz deve ser reconstruida.
-
-\subsection{Árvore de Segmentos}
-Uma árvore de segmentos foi escolhida como forma elaborada de se estruturar os dados. Cada nó na arvóre representa um intervalo. As folhas representam todos intervalos de largura $1$, já os nós internos representam o intervalo resultante da união dos intervalos de seus descendentes. A raiz representa o intervalo correspondente a todo o vetor.
+Para ilustrar a solução, utilizaremos um caso particular onde $n = 3$. A seguinte árvore representa os possíveis desdobramentos do campeonato neste caso:
 \begin{diagram}[h]
   \centering
   \begin{tikzpicture}[sibling distance=20pt]
@@ -137,69 +131,66 @@ Uma árvore de segmentos foi escolhida como forma elaborada de se estruturar os 
     \node [below left=.1cm of s6, xshift=1.7cm] {$2 \triangleright 1$};
   \end{tikzpicture}
 \end{diagram}\\
-Para se obter a tripla de um certo intervalo $i$, é necessário percorrer a árvore a partir da raiz.
-Para um nó que reprenta um intervalo $j$, há as seguintes possibilidades:
-\vspace{-8pt}
+Cada nó da árvore corresponde ao grupo $G$ ainda presente no campeonato.
+
+\noindent As folhas contém grupos unitários, que indicam o campeão do desdobramento descrito pelo caminho da raiz até a folha.
+
+\noindent O rótulo $i \triangleright j$ para cada aresta indica que na rodada e configuração correspondentes os jogadores $i$ e $j$ foram escolhidos para o embate, e o jogador $i$ venceu.
+
+\noindent Cada nível de arestas corresponde à uma rodada, e cada aresta é uma possibilidade para a rodada. Em cada nível, o número $a$ de arestas é
+\[ a = \binom{|G|}{2} = \frac{{|G|}^2 - |G|}{2} \]
+
+\pagebreak
+
+\noindent Cada caminho da raiz até um nó na árvore descreve um desdobramento do campeonato, e portanto possui uma probabilidade associada para cada possível vencedor. Tais probabilidades são compostas pela combinação de dois itens:
 \begin{itemize}
-  \setlength\itemsep{0px}
-  \item $j \subseteq i$: A tripla contida no nó é associada ao resultado final. Os descendentes do nó são desconsiderados.
-  \item $j \cap i \neq \varnothing$: A tripla contida no nó é desconsiderada. Continua-se a iteração em seus descendentes.
-  \item $j \cap i = \varnothing$: O nó e seus descendentes são desconsiderados.
+  \item A probabilidade associada à rodada: Cada rodada é modelada como uma aresta para cada escolha de um vencedor e um perdedor possível. Cada aresta corresponde à equiprovável da escolha dos jogadores vezes a chance do vencedor vencer.
+    \[ P(i \triangleright j) = \frac{1}{a} \cdot V_{i,j} = \frac{2}{{|G|}^2 - |G|} \cdot V_{i,j} \]
+  \item A probabilidade associada à subárvore conectada pela aresta, que corresponde à combinação das probabilidades das subarestas.
 \end{itemize}
-Para alterar dada folha na árvore, é necessário apenas alterar seu valor e recomputar o valor de todos seus antecessores até a raiz.
+
+\noindent O segundo item denota um subproblema, pois a subárvore conectada por cada aresta pode ser considerada um subcampeonato. Como é notável no diagrama, vários subcampeonatos equivalentes ocorrem quando geramos a árvore de desdobramentos. Estes foram dispostos com a mesma cor para melhor visualização.
+
+\noindent Efetivamente, a probabilidade de um jogador vencer o campeonato é o somatório das probabilidades dos desdobramentos em que ele vence.
+
+\subsection{Estratégia de Memorização}
+Os subproblemas foram definidos como os subcampeonatos. Um subcampeonato é constituido pela exclusão de alguns membros do campeonato original $C$, devido à eliminação das rodadas passadas. Portanto, todos subcampeonatos possíveis pertencem ao conjunto potência de $C$.
+
+Como todos os desdobramentos do campeonato $C$ são necessários para a solução do problema, gerar o conjunto potência se torna necessário. Porém, os subcampeonatos com menos de 2 jogadores não são interessantes, então podemos excluí-los da memorização. Portanto, é necessário memorizar $m$ grupos
+\begin{align*}
+  m & = |\mathcal{P}(C)| - |C| - 1 \\
+  & = 2^n - n - 1
+\end{align*}
+Para memorizar tais grupos, um vetor foi adotado. Também foi necessária uma forma eficiente de identificar cada grupo no vetor. Considerando que o tamanho máximo de jogadores definido por Nubby foi $25$, um inteiro de largura fixa de 32 bits é utilizado para identificar cada grupo. Cada bit no corresponde à presença do jogador no grupo
+\begin{align*}
+  0 \hdots 0 \> 00011010_b &\equiv [1, 3, 4] \\
+  0 \hdots 1 \> 00100101_b &\equiv [0, 2, 5, 8] \\
+  0 \hdots 0 \> 11111111_b &\equiv [0, 1, 2, 3, 4, 5, 6, 7]
+\end{align*}
+Para converter desta representação para um índice no vetor, é necessário descontar os grupos unitários e o grupo vazio que não foram considerados. A seguinte função realiza esta compensação em um identificador de grupo $g$:
+\[ \varphi(g) = g - \lceil \log_2 g \rceil - 1 \]
+
+
+\pagebreak
 
 
 \section{Análise de Complexidade}
 
-\subsection{Matriz}
-\subsubsection{Espacial}
-Para um vetor de tamanho $n$, a matriz com todos intervalos possui dimensão $n \times n$. \\
-Portanto a complexidade espacial da matriz é $\Theta(n^2)$.
+\subsection{Espacial}
+\noindent Para a matriz $M$, são alocados $n^2$ \textit{floats}.\\[5pt]
+Para cada subgrupo, são alocados $n$ \textit{floats}, correspondendo à probabilidade de cada jogador vencer.\\
+Aos jogadores não presentes no grupo é atribuida probabilidade $0$ de vencer. \\[5pt]
+São $2^n - n - 1$ grupos, portanto $(2^n - n - 1) \cdot n$ \textit{floats} alocados. \\[5pt]
+A complexidade espacial final é
+\begin{align*}
+  & \Theta \left( n^2 + (2^n - n - 1) \cdot n \right) \\
+  & \Theta \left( n^2 + n \cdot 2^n - n^2 - n \right) \\
+  & \Theta \left(n \cdot 2^n - n \right) \\
+  & \Theta \left(n \cdot 2^n \right)
+\end{align*}
 
-\subsubsection{Temporal}
-Três operações são relevantes para análise temporal:
-\vspace{-5pt}
-\begin{itemize}
-  \item \uline{Criação}: A criação da matriz demanda dois passos combinados.
-        \begin{itemize}
-          \item É necessário computar cada elemento da matriz de dimensão $n \times n$.\\
-                Portanto, este passo possui complexidade: $\mathcal{O}(n^2)$.
-          \item Para cada elemento, é necessário calcular a tripla correspondente. \\
-                Tal operação é linear no tamanho do vetor. Complexidade: $\mathcal{O}(n)$.
-        \end{itemize}
-        A combinação desses dois passos resulta em $\mathcal{O}(n^2) \cdot \mathcal{O}(n) = \mathcal{O}(n^3)$.
-  
-  \item \uline{Consulta}: Para consultar a tripla correspondente a um intervalo $[i, j]$, basta acessar diretamente o elemento na posição $i, j$ da matriz. Portanto, a complexidade é $\Theta(1)$.
-  
-  \item \uline{Atualização}: Como a atualização de um elemento no vetor implica na reconstrução de toda a matriz, a complexidade é a mesma da operação de criação: $\Theta(n^3)$.
-\end{itemize}
-
-
-\subsection{Árvore}
-
-\subsubsection{Espacial}
-Devido à preferencia de Nubby por memória sequencial, a árvore teve de ser implementada em um vetor. Para tal, é necessário que a árvore seja completa. O número de nós em uma árvore binária completa de $x$ folhas é $2x - 1$. Porém, o número de elementos $n$ da entrada não necessariamente é uma potência de $2$, o que torna necessário obter a potência de $2$ mais próxima que é maior que $n$. Então, o número de nós da árvore de segmentos será 
-\[ 2 \cdot 2^{\lceil \log_2 n \rceil} - 1 \]
-Considerando as propriedades da função teto, tal expressão jamais será superior a expressão\footnote{\label{link1}https://discuss.codechef.com/questions/85040/size-of-segment-tree} \\
-\[ 2 \cdot 2^{\log_2(n) + 1} - 1 \]
-que pode ser simplificada:
-\begin{gather*}
-  2 \cdot 2 \cdot 2^{\log_2(n)} - 1 \\
-  2 \cdot 2 \cdot n - 1 \\
-  4n - 1
-\end{gather*}
-A complexidade espacial da árvore é portanto $\mathcal{O}(n)$.
-
-\subsubsection{Temporal}
-Três operações são relevantes para análise temporal:
-\vspace{-5pt}
-\begin{itemize}
-  \item \uline{Criação}: Na criação da árvore, cada nó é computado somente uma vez. Como há $2n - 1$ nós no total, a complexidade é $\Theta(n)$.
-
-  \item \uline{Consulta}: Para consultar a tripla correspondente a um intervalo $i$, basta percorrer a árvore a partir da raiz, associando as triplas dos nós cujo intervalo está totalmente contido no intervalo $i$. Em cada nível, no máximo dois nós serão expandidos.\footnote{\label{link2}https://cs.stackexchange.com/questions/37669/time-complexity-proof-for-segment-tree-implementation-of-the-ranged-sum-problem} Como a altura da árvore é $\log n$, no máximo $2 \cdot \log n$ nós serão expandidos no total. \\ Portanto, a complexidade é $\mathcal{O}(\log n)$.
-  
-  \item \uline{Atualização}: Para atualizar uma folha, esta e todos os seus antecessores são atualizados. Como há apenas um antecessor por nível, o número de atualizações é equivalente à altura da árvore. Portanto, a complexidade é $\Theta(\log n)$.
-\end{itemize}
+\subsection{Temporal}
+Portanto, a complexidade é $\mathcal{O}(\log n)$.
 
 
 \section{Análise Experimental}
@@ -207,11 +198,13 @@ A análise experimental da implementação é mostrada pela figura 1. Para reali
 \vspace{-10pt}
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.45\linewidth]{images/time.png}
-  \includegraphics[width=0.45\linewidth]{images/space.png}
+  \includegraphics[width=0.49\linewidth]{images/time.png}
+  \includegraphics[width=0.49\linewidth]{images/space.png}
   \caption{Figura 1: Teste experimental}
 \end{figure}\\
 Nos gráficos da figura 1 é notável o ganho em eficiência da árvore de segmentos sobre a matriz.
+
+\pagebreak
 
 \section{Conclusão}
 O objetivo do trabalho foi atingido ao demonstrar as diferenças na eficiência das soluções propostas, tanto teoricamente quanto experimentalmente. Tornou-se evidente o grande ganho obtido na performance ao se utilizar uma estruturação de dados adequada.
