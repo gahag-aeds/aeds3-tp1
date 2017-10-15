@@ -9,16 +9,16 @@ tests_dir = os.path.dirname(os.path.realpath(__file__))
 
 
 tptester.tp_test(
-  # [ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 ],
-  [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ],
+  [ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 ],
+  #[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ],
   os.getcwd() + '/kontest',
   
   #valgrind = True,
   
   #graph = True,
   
-  input_file = lambda ix: tests_dir + '/data/toys2/in_' + str(ix) + '.in',
-  answer_file = lambda ix: tests_dir + '/data/toys2/in_' + str(ix) + '.out',
+  input_file = lambda ix: tests_dir + '/data/bench/' + str(ix) + '.in',
+  answer_file = lambda ix: None, #tests_dir + '/data/toys2/in_' + str(ix) + '.out',
   
   args = lambda ix: [ ],
   stdin = lambda ifile: ifile,

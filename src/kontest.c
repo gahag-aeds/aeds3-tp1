@@ -45,13 +45,7 @@ static Group* get_group(size_t probs_size, Group* groups, GroupId id) {
 static Group* compute(ProbMat* probmat, Group* groups, GroupId grp) {
   const size_t teams_count = probmat_size(probmat);
   
-  // Due to the exclusion of the empty and unitary groups,
-  // it is necessary to exclude them from the indexing.
-  // ceil(log2(grp)) is the number of unitary groups that precede the given group.
-  // 1 corresponds to the empty group.
-  const size_t group_ix = grp - (size_t) ceil(log2(grp)) - 1;
-  
-  Group* group = get_group(teams_count, groups, group_ix);
+  Group* group = get_group(teams_count, groups, grp);
   
   if (group->processed)
     return group;
@@ -126,9 +120,12 @@ Probability* kontest_championship(const Allocator* allocator, ProbMat* probmat) 
   const size_t teams_count = probmat_size(probmat);
   
   // All possible subgroups of a group G are: P(G) \ U(G) \ {}
-  // Where P(G) is the powerset of G, U(G) are the unitary subsets of G.
+  // Where P(G) is the powerset of G, and U(G) are the unitary subsets of G.
   // The set of possible subgroups therefore has cardinality 2^|G| - |G| - 1.
-  const size_t groups_size = (1ul << teams_count) - teams_count - 1;
+  // But, excluding those groups causes a huge number of cache misses.
+  // Benchmarks have showed slow downs of more than an hour for inputs of size 25.
+  // So, lets keep those useless groups anyway.
+  const size_t groups_size = 1ul << teams_count;
   
   Group* groups = al_alloc_clear(
     allocator,
