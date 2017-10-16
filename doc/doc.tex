@@ -175,9 +175,13 @@ Para memorizar tais grupos, um vetor foi adotado. Também foi necessária uma fo
   0 \hdots 0 \> 11111111_2 &\equiv [0, 1, 2, 3, 4, 5, 6, 7]
 \end{align*}
 Para converter desta representação para um índice no vetor, é necessário descontar os grupos unitários e o grupo vazio que não foram considerados. A seguinte função realiza esta compensação em um identificador de grupo $g$:
-\[ \varphi(g) = g - \lceil \log_2 g \rceil - 1 \]
-
-
+\begin{equation} \label{eq:groupix}
+  \varphi(g) = g - \lceil \log_2 g \rceil - 1
+\end{equation}
+Ao realizar \textit{benchmarks} com programa, o tempo de execução estava bem acima do esperado para entradas grandes. Ao investigar, foi concluido que um grande número de \textit{cache misses}\footnote{\url{https://en.wikipedia.org/wiki/CPU_cache\#Cache_miss}} ocorria devido à estratégia\footnote{\autoref{eq:groupix}} de correção dos índices no vetor de memorização. Tal estratégia portanto foi descartada, e aceitou-se o desperdício de memória dos conjuntos unitários e vazio em prol do tempo de execução. Reduções de mais de uma hora na execução foram observadas para entradas de tamanho $n = 25$.
+\begin{equation} \label{eq:memory}
+  m = |\mathcal{P}(C)| = 2^n
+\end{equation}
 \pagebreak
 
 
@@ -187,21 +191,19 @@ Para converter desta representação para um índice no vetor, é necessário de
 \noindent Para a matriz $M$, são alocados $n^2$ \textit{floats}.\\[5pt]
 Para cada subcampeonato, são alocados $n$ \textit{floats}, correspondendo à probabilidade de cada jogador vencer.\\
 Aos jogadores não presentes no subcampeonato é atribuida probabilidade $0$ de vencer. \\[5pt]
-São $2^n - n - 1$ grupos, portanto $(2^n - n - 1) \cdot n$ \textit{floats} alocados. \\[5pt]
+São $2^n$ grupos, portanto $2^n \cdot n$ \textit{floats} alocados.\footnote{\autoref{eq:memory}} \\[5pt]
 A complexidade espacial final é
 \begin{align*}
-  & \Theta \left( n^2 + (2^n - n - 1) \cdot n \right) \\
-  & \Theta \left( n^2 + n \cdot 2^n - n^2 - n \right) \\
-  %% & \Theta \left(n \cdot 2^n - n \right) \\
+  & \Theta \left( n^2 + 2^n \cdot n \right) \\
   & \Theta \left(n \cdot 2^n \right)
 \end{align*}
 
 \subsection{Temporal}
 \noindent Todos os subcampeonatos são calculados exatamente uma vez. Portanto, as probabilidades para todos grupos do conjunto potência do campeonato, exceto os unitários e o vazio, serão calculadas.
 
-\noindent No conjunto potência, há exatamente $\binom{n}{i}$ subconjuntos de cardinalidade $i$.\footnote{\label{link1}\url{https://en.wikipedia.org/wiki/Power_set\#Relation_to_binomial_theorem}} Cada um destes subconjuntos representa um subgrupo de tamanho $i$, nos quais a rodada imediata contém $2a$ combinações.\footnote{\label{link2}\autoref{eq:combinations}} Como todos subcampeonatos de cardinalidade $2$ até $n$ serão calculados, a complexidade se resume ao somatório:
+\noindent No conjunto potência, há exatamente $\binom{n}{i}$ subconjuntos de cardinalidade $i$.\footnote{\url{https://en.wikipedia.org/wiki/Power_set\#Relation_to_binomial_theorem}} Cada um destes subconjuntos representa um subgrupo de tamanho $i$, nos quais a rodada imediata contém $2a$ combinações.\footnote{\autoref{eq:combinations}} Como todos subcampeonatos de cardinalidade $2$ até $n$ serão calculados, a complexidade se resume ao somatório:
 \[ f(n) = 2 \cdot \sum_{i=2}^n \binom{n}{i} \binom{i}{2} \]
-Para desenvolver o somatório, utilizaremos alguns artifícios \footnote{\label{link3}\url{https://math.stackexchange.com/questions/2472972/prove-that-sum-i-2n-binomni-binomi2-2n-3-cdot-nn-1}}
+Para desenvolver o somatório, utilizaremos alguns artifícios \footnote{\url{https://math.stackexchange.com/questions/2472972/prove-that-sum-i-2n-binomni-binomi2-2n-3-cdot-nn-1}}
 \begin{align*}
   {(1 + x)}^n &= \sum_{i=0}^n \binom{n}{i} \cdot x^i && \text{pelo teorema binomial} \\
   n(n - 1){(1 + x)}^{n - 2} &= \sum_{i = 2}^n \binom{n}{i} \cdot i(i - 1) \cdot x^i && \text{derivando ambos lados duas vezes} \\
@@ -222,7 +224,7 @@ Portanto, a complexidade obtida é
 
 
 \section{Análise Experimental}
-A análise experimental da implementação é mostrada pela figura 1. Para realizar os experimentos, foi feito um gerador de entradas. Para um valor $n$, é gerada uma entrada contendo um vetor de tamanho $n$, e $n / 2$ operações de busca e atualização intercaladas. O intervalo em cada operação é aleatório, mas a largura do intervalo é fixa em $n / 3$. Para medir o tempo de execução do código, foi utilizada a informação de uso de recursos fornecida pelo sistema operacional linux. Os valores $n$ foram escolhidos estrategicamente para cada teste. A razão inicial é verificar, de forma geral, o comportamento dos algoritmos para casos genéricos.
+A análise experimental da implementação é mostrada pela figura 1. Para realizar os experimentos, foi feito um gerador de entradas. Para um valor $n$, é gerada uma entrada contendo uma matriz $V \in \mathbb{M}_{n \times n}$. Para medir o tempo de execução do código, foi utilizada a informação de uso de recursos fornecida pelo sistema operacional linux.\footnote{\url{https://en.wikipedia.org/wiki/Procfs}} A razão inicial é verificar, de forma geral, o comportamento do algoritmo para casos genéricos.
 \vspace{-10pt}
 \begin{figure}[h]
   \centering
@@ -230,11 +232,11 @@ A análise experimental da implementação é mostrada pela figura 1. Para reali
   \includegraphics[width=0.49\linewidth]{images/space.png}
   \caption{Figura 1: Teste experimental}
 \end{figure}\\
-Nos gráficos da figura 1 é notável o ganho em eficiência da árvore de segmentos sobre a matriz.
+Nos gráficos da figura comprova-se as complexidades calculadas anteriormente.
 
 
 \section{Conclusão}
-O objetivo do trabalho foi atingido ao demonstrar as diferenças na eficiência das soluções propostas, tanto teoricamente quanto experimentalmente. Tornou-se evidente o grande ganho obtido na performance ao se utilizar uma estruturação de dados adequada.
+Mesmo a complexidade final sendo superior à exponencial, houve uma grande melhoria em relação à solução inicial desenvolvida sem memorização. O problema em específico se demonstrou interessante no aspecto de que, sem a programação dinâmica, o tempo gasto para a solução é claramente inviável. Portanto, a programação dinâmica não só melhorou o tempo da solução neste caso, como também tornou possível obter resultados antes inviáveis.
 
 
 
