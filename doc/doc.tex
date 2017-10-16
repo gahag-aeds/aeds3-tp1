@@ -147,9 +147,11 @@ O número $a$ de escolhas de dois jogares é
 \end{equation}
 Portanto, o número de arestas em cada nível é $2a$, pois para cada escolha de dois jogadores há dois possíveis vencedores.
 
+\noindent Cada caminho da raiz até um nó na árvore descreve um desdobramento do campeonato, e portanto possui uma probabilidade associada para cada possível vencedor.
+
 \pagebreak
 
-\noindent Cada caminho da raiz até um nó na árvore descreve um desdobramento do campeonato, e portanto possui uma probabilidade associada para cada possível vencedor. Tais probabilidades são compostas pela combinação de dois itens:
+\noindent Tais probabilidades são compostas pela combinação de dois itens:
 \begin{itemize}
   \item A probabilidade associada à rodada: Cada rodada é modelada como uma aresta para cada escolha de um vencedor e um perdedor possível. Cada aresta corresponde à equiprovável da escolha dos jogadores vezes a chance do vencedor vencer.
     \[ P(i \triangleright j) = \frac{1}{a} \cdot V_{i,j} = \frac{2}{{|G|}^2 - |G|} \cdot V_{i,j} \]
@@ -159,6 +161,10 @@ Portanto, o número de arestas em cada nível é $2a$, pois para cada escolha de
 \noindent O segundo item denota um subproblema, pois a subárvore conectada por cada aresta pode ser considerada um subcampeonato. Como é notável no diagrama, vários subcampeonatos equivalentes ocorrem quando geramos a árvore de desdobramentos. Estes foram dispostos com a mesma cor para melhor visualização.
 
 \noindent Efetivamente, a probabilidade de um jogador vencer o campeonato é o somatório das probabilidades dos desdobramentos em que ele vence.
+\begin{align*}
+  T(1) &= O(1) \\
+  T(n) &= T(n-1) + O(n^2)
+\end{align*}
 
 \subsection{Estratégia de Memorização}
 Os subproblemas foram definidos como os subcampeonatos. Um subcampeonato é constituido pela exclusão de alguns membros do campeonato original $C$, devido à eliminação das rodadas passadas. Portanto, todos subcampeonatos possíveis pertencem ao conjunto potência de $C$.
@@ -178,7 +184,7 @@ Para converter desta representação para um índice no vetor, é necessário de
 \begin{equation} \label{eq:groupix}
   \varphi(g) = g - \lceil \log_2 g \rceil - 1
 \end{equation}
-Ao realizar \textit{benchmarks} com programa, o tempo de execução estava bem acima do esperado para entradas grandes. Ao investigar, foi concluido que um grande número de \textit{cache misses}\footnote{\url{https://en.wikipedia.org/wiki/CPU_cache\#Cache_miss}} ocorria devido à estratégia\footnote{\autoref{eq:groupix}} de correção dos índices no vetor de memorização. Tal estratégia portanto foi descartada, e aceitou-se o desperdício de memória dos conjuntos unitários e vazio em prol do tempo de execução. Reduções de mais de uma hora na execução foram observadas para entradas de tamanho $n = 25$.
+Ao realizar \textit{benchmarks} com a implementação, o tempo de execução estava bem acima do esperado para entradas grandes. Ao investigar, foi concluido que um grande número de \textit{cache misses}\footnote{\url{https://en.wikipedia.org/wiki/CPU_cache\#Cache_miss}} ocorria devido à estratégia\footnote{\autoref{eq:groupix}} de correção dos índices no vetor de memorização. Tal estratégia portanto foi descartada, e aceitou-se o desperdício de memória dos conjuntos unitários e vazio em prol do tempo de execução. Reduções de mais de uma hora na execução foram observadas para entradas de tamanho $n = 25$.
 \begin{equation} \label{eq:memory}
   m = |\mathcal{P}(C)| = 2^n
 \end{equation}
@@ -236,7 +242,7 @@ Nos gráficos da figura comprova-se as complexidades calculadas anteriormente.
 
 
 \section{Conclusão}
-Mesmo a complexidade final sendo superior à exponencial, houve uma grande melhoria em relação à solução inicial desenvolvida sem memorização. O problema em específico se demonstrou interessante no aspecto de que, sem a programação dinâmica, o tempo gasto para a solução é claramente inviável. Portanto, a programação dinâmica não só melhorou o tempo da solução neste caso, como também tornou possível obter resultados antes inviáveis.
+Mesmo a complexidade final sendo superior à exponencial, houve uma grande melhoria em relação à solução inicial desenvolvida sem memorização. O problema em específico se demonstrou interessante no aspecto de que, sem a programação dinâmica, o tempo gasto para a solução é claramente inviável. Portanto, a programação dinâmica não só melhorou o tempo da solução neste caso, como também tornou possível obter resultados antes inalcançáveis.
 
 
 
