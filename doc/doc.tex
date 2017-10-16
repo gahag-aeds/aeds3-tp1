@@ -161,10 +161,7 @@ Portanto, o número de arestas em cada nível é $2a$, pois para cada escolha de
 \noindent O segundo item denota um subproblema, pois a subárvore conectada por cada aresta pode ser considerada um subcampeonato. Como é notável no diagrama, vários subcampeonatos equivalentes ocorrem quando geramos a árvore de desdobramentos. Estes foram dispostos com a mesma cor para melhor visualização.
 
 \noindent Efetivamente, a probabilidade de um jogador vencer o campeonato é o somatório das probabilidades dos desdobramentos em que ele vence.
-\begin{align*}
-  T(1) &= O(1) \\
-  T(n) &= T(n-1) + O(n^2)
-\end{align*}
+\[ P(p, G) = \sum_{p \text{ campeão}}\left\{ P(i \triangleright j) \cdot P\left(p, \> G \setminus \{j\} \right) \enspace\Big|\enspace i,j \in G, \enspace i \neq j, \enspace j \neq p \right\} \]
 
 \subsection{Estratégia de Memorização}
 Os subproblemas foram definidos como os subcampeonatos. Um subcampeonato é constituido pela exclusão de alguns membros do campeonato original $C$, devido à eliminação das rodadas passadas. Portanto, todos subcampeonatos possíveis pertencem ao conjunto potência de $C$.
