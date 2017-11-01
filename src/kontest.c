@@ -76,6 +76,9 @@ static Group* compute(ProbMat* probmat, Group* groups, GroupId grp) {
       
       // Loop over the probabilities array of the group:
       for (uint8_t i = 0; i < teams_count; i++) {
+        if (!testbit_32(grp, i))
+          continue;
+        
         // second loses:
         if (second != i) {
           Probability prob = pick * (*probmat_query(probmat, first, second));
