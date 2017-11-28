@@ -1,6 +1,6 @@
 [submodule "src/libaeds"]
 	path = src/libaeds
-	url = https://github.com/gahag/libaeds
+	url = https://github.com/gahag-aeds/libaeds
 [submodule "tests/tptester"]
 	path = tests/tptester
-	url = https://github.com/gahag/tptester
+	url = https://github.com/gahag-aeds/tptester
