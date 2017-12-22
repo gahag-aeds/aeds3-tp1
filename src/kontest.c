@@ -42,7 +42,7 @@ static Group* get_group(size_t probs_size, Group* groups, GroupId id) {
 // Function to compute the probabilities for a specific group.
 // If the probabilities have already been calculated, no recalculations are made.
 // Complexity: O()
-static Group* compute(ProbMat* probmat, Group* groups, GroupId grp) {
+static Group* compute(ProbMat* probmat, Group* groups, const GroupId grp) {
   const size_t teams_count = probmat_size(probmat);
   
   Group* group = get_group(teams_count, groups, grp);
@@ -62,23 +62,25 @@ static Group* compute(ProbMat* probmat, Group* groups, GroupId grp) {
   Probability pick = 2.0 / (grp_size * grp_size - grp_size);
   
   // Loop over teams in the group:
-  const uint8_t bottom = lsb_32(grp); // Index of the first set bit in grp.
-  const uint8_t top = msb_32(grp);    // Index of the last set bit in grp.
-  
-  for (uint8_t first = bottom; first < top; first++) { // All except last.
-    if (!testbit_32(grp, first))  // Team is not in the group.
-      continue;
-    
-    // Loop over the next teams:
-    for (uint8_t second = first + 1; second < top + 1; second++) { // All after first.
-      if (!testbit_32(grp, second)) // Team is not in the group.
-        continue;
-      
-      // Loop over the probabilities array of the group:
-      for (uint8_t i = 0; i < teams_count; i++) {
-        if (!testbit_32(grp, i))
-          continue;
-        
+  GroupId g1 = grp;
+  const GroupId last = setbit_32(0, msb_32(g1));
+  for ( // All except last.
+    uint8_t first = lsb_32(g1);
+    g1 != last;
+    g1 = unsetbit_32(g1, first), first = lsb_32(g1)
+  ) {
+    GroupId g2 = unsetbit_32(g1, first); // all after first.
+    for ( // Loop over the next teams:
+      uint8_t second = lsb_32(g2);
+      g2 != 0;
+      g2 = unsetbit_32(g2, second), second = lsb_32(g2)
+    ) {
+      GroupId g = grp;
+      for ( // Loop over the probabilities array of the group:
+        uint8_t i = lsb_32(g);
+        g != 0;
+        g = unsetbit_32(g, i), i = lsb_32(g)
+      ) {
         // second loses:
         if (second != i) {
           Probability prob = pick * (*probmat_query(probmat, first, second));
