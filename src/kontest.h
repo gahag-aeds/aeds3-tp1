@@ -13,7 +13,7 @@
 // For a given ProbMat, calculate the probabilities
 // of each player winning the correspondent mortal kontest championship.
 // The caller has the responsibility to free the returned pointer with the given allocator.
-// Complexity: O()
+// Complexity: O(n^2 * 2^n)
 Probability* kontest_championship(const Allocator*, ProbMat*);
 
 

@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include <libaeds/data/bits.h>
+#include <libaeds/data/math.h>
 
 
 // A GroupId identifies a group. Each team in the championship is represented by one bit
@@ -41,9 +42,19 @@ static Group* get_group(size_t probs_size, Group* groups, GroupId id) {
 
 // Function to compute the probabilities for a specific group.
 // If the probabilities have already been calculated, no recalculations are made.
-// Complexity: O()
+// Complexity: O(n^2 * 2^n)
 static Group* compute(ProbMat* probmat, Group* groups, const GroupId grp) {
-  Group* group = get_group(probmat_size(probmat), groups, grp);
+  // Due to the exclusion of the empty and unitary groups,
+  // it is necessary to exclude them from the indexing.
+  // ceil(log2(grp)) is the number of unitary groups that precede the given group.
+  // 1 corresponds to the empty group.
+  const uint32_t log2 = log2_32(grp);
+  const uint32_t ceil_log2 = grp - log2 == 0 ? log2
+                                             : log2 + 1;
+  const size_t group_ix = grp - ceil_log2 - 1;
+  
+  Group* group = get_group(probmat_size(probmat), groups, group_ix);
+  
   
   if (group->processed)
     return group;
@@ -53,8 +64,10 @@ static Group* compute(ProbMat* probmat, Group* groups, const GroupId grp) {
   
   uint8_t grp_size = popcount_32(grp);
   
-  // For a group of size n, the number of possible picks of two teams is T = (n^2 - n) / 2.
-  // Considering all picks are equiprobable, the probability is 1 / T.
+  // For a group of size n, the number of possible picks of two teams is
+  // T = (n^2 - n) / 2
+  // Considering all picks are equiprobable, the probability is
+  // 1 / T
   Probability pick = 2.0 / (grp_size * grp_size - grp_size);
   
   // Loop over teams in the group:
@@ -114,10 +127,7 @@ Probability* kontest_championship(const Allocator* allocator, ProbMat* probmat) 
   // All possible subgroups of a group G are: P(G) \ U(G) \ {}
   // Where P(G) is the powerset of G, and U(G) are the unitary subsets of G.
   // The set of possible subgroups therefore has cardinality 2^|G| - |G| - 1.
-  // But, excluding those groups causes a huge number of cache misses.
-  // Benchmarks have showed slow downs of more than an hour for inputs of size 25.
-  // So, lets keep those useless groups anyway.
-  const size_t groups_size = 1ul << teams_count;
+  const size_t groups_size = pow2_32(teams_count) - teams_count - 1;
   
   Group* groups = al_alloc_clear(
     allocator,
@@ -125,10 +135,9 @@ Probability* kontest_championship(const Allocator* allocator, ProbMat* probmat) 
     sizeof(Group) + sizeof(Probability[teams_count])
   );
   
+  const GroupId base_groupid = pow2_32(teams_count) - 1; // Group with all teams.
   
-  const GroupId base_groupid = (1ul << teams_count) - 1; // Group with all teams.
-  
-  Group* group = compute(probmat, groups, base_groupid); 
+  Group* group = compute(probmat, groups, base_groupid);
   
   
   Probability* result = al_alloc(allocator, 1, sizeof(Probability[teams_count]));
