@@ -43,9 +43,7 @@ static Group* get_group(size_t probs_size, Group* groups, GroupId id) {
 // If the probabilities have already been calculated, no recalculations are made.
 // Complexity: O()
 static Group* compute(ProbMat* probmat, Group* groups, const GroupId grp) {
-  const size_t teams_count = probmat_size(probmat);
-  
-  Group* group = get_group(teams_count, groups, grp);
+  Group* group = get_group(probmat_size(probmat), groups, grp);
   
   if (group->processed)
     return group;
@@ -55,10 +53,8 @@ static Group* compute(ProbMat* probmat, Group* groups, const GroupId grp) {
   
   uint8_t grp_size = popcount_32(grp);
   
-  // For a group of size n, the number of possible picks of two teams is
-  // T = (n^2 - n) / 2
-  // Considering all picks are equiprobable, the probability is
-  // 1 / T
+  // For a group of size n, the number of possible picks of two teams is T = (n^2 - n) / 2.
+  // Considering all picks are equiprobable, the probability is 1 / T.
   Probability pick = 2.0 / (grp_size * grp_size - grp_size);
   
   // Loop over teams in the group:
@@ -75,39 +71,30 @@ static Group* compute(ProbMat* probmat, Group* groups, const GroupId grp) {
       g2 != 0;
       g2 = unsetbit_32(g2, second), second = lsb_32(g2)
     ) {
+      Group* subgroup_1 = NULL; // subgroup that excludes the second.
+      Group* subgroup_2 = NULL; // subgroup that excludes the first.
+      Probability prob_1 = pick * (*probmat_query(probmat, first, second))  // 1 beat 2
+                , prob_2 = pick * (*probmat_query(probmat, second, first)); // 2 beat 1
+      
+      if (grp_size > 2) { // There are only subgroups to groups bigger than 2.
+        subgroup_1 = compute(probmat, groups, unsetbit_32(grp, second));
+        subgroup_2 = compute(probmat, groups, unsetbit_32(grp, first));
+      }
+      
+      
       GroupId g = grp;
       for ( // Loop over the probabilities array of the group:
         uint8_t i = lsb_32(g);
         g != 0;
         g = unsetbit_32(g, i), i = lsb_32(g)
       ) {
-        // second loses:
-        if (second != i) {
-          Probability prob = pick * (*probmat_query(probmat, first, second));
-          
-          if (grp_size > 2) { // There are only subgroups to groups bigger than 2.
-            // subgroup that excludes the second:
-            Group* subgroup = compute(probmat, groups, unsetbit_32(grp, second));
-            
-            prob *= subgroup->probs[i];
-          }
-
-          group->probs[i] += prob;
-        }
+        if (second != i) // first wins.
+          group->probs[i] += (grp_size < 3) ? prob_1 // no subgroup to group of size 2.
+                                            : prob_1 * subgroup_1->probs[i];
         
-        // first loses:
-        if (first != i) {
-          Probability prob = pick * (*probmat_query(probmat, second, first));
-          
-          if (grp_size > 2) { // There are only subgroups to groups bigger than 2.
-            // subgroup that excludes the first:
-            Group* subgroup = compute(probmat, groups, unsetbit_32(grp, first));
-
-            prob *= subgroup->probs[i];
-          }
-          
-          group->probs[i] += prob;
-        }
+        if (first != i) // second wins.
+          group->probs[i] += (grp_size < 3) ? prob_2 // no subgroup to group of size 2.
+                                            : prob_2 * subgroup_2->probs[i];
       }
     }
   }

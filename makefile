@@ -5,7 +5,7 @@ CompilationUnits = $(shell find $(SrcDir) -name '*.c')
 OutputFile = kontest
 
 
-Build    = gcc
+Build    = clang
 Standard = -std=c99 -pedantic
 Warnings = -Wall -Wextra -Werror
 Optimize = -O2 -flto
